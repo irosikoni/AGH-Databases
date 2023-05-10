@@ -1,11 +1,9 @@
-import Link from "next/link";
+import SearchForm from "@/components/SearchForm";
 
 export default function Home() {
   return (
-    <div>
-      
-      <div>Home Page</div>
-      <Link href={"/example"}>Example Page</Link>
+    <div className="p-5 my-5">
+      <SearchForm />
     </div>
   );
 }
