@@ -8,12 +8,14 @@ type FetchServer = {
   endpoint: string;
   req: NextApiRequest;
   res: NextApiResponse;
+  body?: any;
 };
 
 export const fetchServer = async ({
   endpoint,
   req,
   res,
+  body,
 }: FetchServer): Promise<
   | {
       ok: false;
@@ -29,22 +31,33 @@ export const fetchServer = async ({
     }
 > => {
   let accessToken: string | undefined;
+  console.log("fetchServer function called");
   try {
     const data = await getAccessToken(req, res);
     accessToken = data?.accessToken;
   } catch (err) {
     return { ok: false, error: "Unauthorized" };
   }
+  console.log("accessToken: ", accessToken);
   const { BACKEND_URL } = process.env;
+  console.log("BACKEND_URL: ", BACKEND_URL);
   if (!BACKEND_URL) {
     throw new Error("BACKEND_URL is not defined");
   }
+  console.log("id: ", req.body.ticketId);
   const headers = accessToken
     ? { Authorization: `Bearer ${accessToken}` }
     : undefined;
-  const response = await fetch(`${BACKEND_URL}${endpoint}`, {
-    headers,
-  });
+    const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+      method: body ? 'POST' : 'GET', // Jeżeli przekazujemy dane to ustawiamy metodę na 'POST'
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json', // Jeżeli przekazujemy dane to potrzebujemy nagłówka
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    console.log("response: ", response.body);
+    console.log("respone.ok: ", response.ok);
   if (response.status === 401) {
     return { ok: false, error: "Unauthorized" };
   }
